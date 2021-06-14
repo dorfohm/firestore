@@ -3,36 +3,51 @@ import { Injectable } from '@angular/core';
 import { first, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Course } from 'app/model/course';
-import { convertSnaps} from './db-utils';
+import { convertSnaps } from './db-utils';
+import { CourseResolver } from './course.resolver';
+import { Lesson } from 'app/model/lesson';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CoursesService {
-  findCourseByUrl(CourseUrl: string):Observable<Course> {
-    return this.db.collection('courses',
-    ref => ref.where("url", "==", CourseUrl))
-    .snapshotChanges()
-    .pipe(
-      map(snaps => {
-        const courses = convertSnaps<Course>(snaps);
-        return courses.length == 1 ? courses[0]: undefined;
-      })
-    )
-    throw new Error("Method not implemented.");
-  }
 
   constructor(private db: AngularFirestore) { }
 
-  loadAllCourses(): Observable<Course[] >{
+  loadAllCourses(): Observable<Course[]> {
     return this.db.collection(
       'courses',
-      ref=> ref
-      .orderBy("seqNo")
+      ref => ref
+        .orderBy("seqNo")
+    )
+      .snapshotChanges()
+      .pipe(map(snaps => convertSnaps<Course>(snaps)),
+        first());
+  }
+
+  findCourseByUrl(courseUrl: string): Observable<Course> {
+    return this.db.collection('courses',
+      ref => ref.where("url", "==", courseUrl))
+      .snapshotChanges()
+      .pipe(
+        map(snaps => {
+          const courses = convertSnaps<Course>(snaps);
+          return courses.length == 1 ? courses[0] : undefined;
+        }),
+        first());
+  }
+
+  findLessons(courseId: string, sortOrder: OrderByDirection = 'asc',
+    pageNumber = 0, pageSize = 3): Observable<Lesson[]> {
+    return this.db.collection(`courses/${courseId}/lessons`,
+      ref => ref.orderBy('seqNo', sortOrder)
+      .limit(pageSize)
+      .startAfter (pageNumber * pageSize)
+      ).snapshotChanges()
+      .pipe(
+        map(snaps => convertSnaps<Lesson>(snaps)),
+        first()
       )
-    .snapshotChanges()
-    .pipe(map(snaps => convertSnaps<Course>(snaps)),
-    first());
   }
 
 

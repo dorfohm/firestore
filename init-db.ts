@@ -10,7 +10,8 @@ var config = {
   storageBucket: "fir-course-9826a.appspot.com",
   messagingSenderId: "870489546458",
   appId: "1:870489546458:web:4d6a05e90f510c1fcd8fe3",
-  measurementId: "G-EKGGLR00P0"};
+  measurementId: "G-EKGGLR00P0"
+};
 
 console.log("Uploading data to the database with the following config:\n");
 

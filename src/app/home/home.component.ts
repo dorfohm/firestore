@@ -23,7 +23,11 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.courses$ = this.coursesService.loadAllCourses();
+      this.reloadCourses();
+    }
+
+    reloadCourses(){
+      this.courses$ = this.coursesService.loadAllCourses();
 
       this.beginnersCourses$ = this.courses$.pipe(
         map(courses => courses.filter(

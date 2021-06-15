@@ -1,7 +1,7 @@
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Injectable } from '@angular/core';
 import { first, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { Course } from 'app/model/course';
 import { convertSnaps } from './db-utils';
 import { CourseResolver } from './course.resolver';
@@ -11,6 +11,9 @@ import { Lesson } from 'app/model/lesson';
   providedIn: 'root'
 })
 export class CoursesService {
+  saveCourse(courseId: string, changes: Partial<Course>):Observable<any> {
+   return from (this.db.doc(`courses/${courseId}`).update(changes));
+  }
 
   constructor(private db: AngularFirestore) { }
 
@@ -37,10 +40,10 @@ export class CoursesService {
         first());
   }
 
-  findLessons(courseId: string, sortOrder: OrderByDirection = 'asc',
+  findLessons(courseId: string,
     pageNumber = 0, pageSize = 3): Observable<Lesson[]> {
     return this.db.collection(`courses/${courseId}/lessons`,
-      ref => ref.orderBy('seqNo', sortOrder)
+      ref => ref.orderBy('seqNo')
       .limit(pageSize)
       .startAfter (pageNumber * pageSize)
       ).snapshotChanges()
